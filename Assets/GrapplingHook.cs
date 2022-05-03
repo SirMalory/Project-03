@@ -4,9 +4,10 @@ using UnityEngine;
 
 public class GrapplingHook : MonoBehaviour
 {
+<<<<<<< HEAD
     private LineRenderer lr;
-    private Vector3 grappleArea;
-    public LayerMask grappleObject;
+    private Vector3 grapplePoint;
+    public LayerMask whatIsGrappleable;
     public Transform gunTip, camera, player;
     private float maxDistance = 100f;
     private SpringJoint joint;
@@ -40,14 +41,14 @@ public class GrapplingHook : MonoBehaviour
     void StartGrapple()
     {
         RaycastHit hit;
-        if (Physics.Raycast(camera.position, camera.forward, out hit, maxDistance, grappleObject))
+        if (Physics.Raycast(camera.position, camera.forward, out hit, maxDistance, whatIsGrappleable))
         {
-            grappleArea = hit.point;
+            grapplePoint = hit.point;
             joint = player.gameObject.AddComponent<SpringJoint>();
             joint.autoConfigureConnectedAnchor = false;
-            joint.connectedAnchor = grappleArea;
+            joint.connectedAnchor = grapplePoint;
 
-            float distanceFromPoint = Vector3.Distance(player.position, grappleArea);
+            float distanceFromPoint = Vector3.Distance(player.position, grapplePoint);
 
             //The distance grapple will try to keep from grapple point. 
             joint.maxDistance = distanceFromPoint * 0.8f;
@@ -80,7 +81,7 @@ public class GrapplingHook : MonoBehaviour
         //If not grappling, don't draw rope
         if (!joint) return;
 
-        currentGrapplePosition = Vector3.Lerp(currentGrapplePosition, grappleArea, Time.deltaTime * 8f);
+        currentGrapplePosition = Vector3.Lerp(currentGrapplePosition, grapplePoint, Time.deltaTime * 8f);
 
         lr.SetPosition(0, gunTip.position);
         lr.SetPosition(1, currentGrapplePosition);
@@ -93,6 +94,69 @@ public class GrapplingHook : MonoBehaviour
 
     public Vector3 GetGrapplePoint()
     {
-        return grappleArea;
+        return grapplePoint;
     }
+=======
+	private bool tethered = false;
+	private Rigidbody rb;
+	private float tetherLength;
+	private Vector3 tetherPoint;
+
+	void Start()
+	{
+		rb = GetComponent<Rigidbody>();
+	}
+
+	void Update()
+	{
+		if (Input.GetKey(KeyCode.Space))
+		{
+			if (!tethered)
+			{
+				StartGrappling();
+			}
+			else
+			{
+				FinishGrappling();
+			}
+		}
+	}
+
+	void FixedUpdate()
+	{
+		if (tethered) GrapplingPhysics();
+	}
+
+	void StartGrappling()
+	{
+		if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, Mathf.Infinity))
+		{
+			tethered = true;
+			tetherPoint = hit.point;
+			tetherLength = Vector3.Distance(tetherPoint, transform.position);
+		}
+	}
+
+	void FinishGrappling()
+	{
+		tethered = false;
+	}
+
+	void GrapplingPhysics()
+	{
+		Vector3 directionToGrapple = Vector3.Normalize(tetherPoint - transform.position);
+		float currentDistanceToGrapple = Vector3.Distance(tetherPoint, transform.position);
+
+		float speedTowardsGrapplePoint = Mathf.Round(Vector3.Dot(rb.velocity, directionToGrapple) * 100) / 100;
+
+		if (speedTowardsGrapplePoint < 0)
+		{
+			if (currentDistanceToGrapple > tetherLength)
+			{
+				rb.velocity -= speedTowardsGrapplePoint * directionToGrapple;
+				rb.position = tetherPoint - directionToGrapple * tetherLength;
+			}
+		}
+	}
+>>>>>>> main
 }

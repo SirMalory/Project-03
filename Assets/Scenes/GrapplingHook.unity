@@ -698,7 +698,10 @@ GameObject:
   - component: {fileID: 1430255541}
   - component: {fileID: 1430255543}
   - component: {fileID: 1430255544}
+<<<<<<< HEAD
   - component: {fileID: 1430255545}
+=======
+>>>>>>> main
   m_Layer: 0
   m_Name: PlayerController
   m_TagString: Untagged
@@ -774,6 +777,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a8d3abda2d3f92439efc6ef6412481f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< HEAD
   whatIsGrappleable:
     serializedVersion: 2
     m_Bits: 0
@@ -796,6 +800,8 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+=======
+>>>>>>> main
 --- !u!1 &2079981116
 GameObject:
   m_ObjectHideFlags: 0
