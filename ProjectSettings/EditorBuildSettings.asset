@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/GrapplingHook.unity
+    guid: 0fd6afc1a318eea41a8c71815c7297c6
   m_configObjects: {}
