@@ -10,6 +10,7 @@ public class GrapplingHook : MonoBehaviour
     public LayerMask grappleObject;
     public Transform hand, cameraSpot, player;
     public GameObject grapplingHook;
+    public AudioSource launchRope, retrieveRope, hookImpact;
     private float maxDistance = 100f;
     private SpringJoint joint;
 
@@ -37,6 +38,7 @@ public class GrapplingHook : MonoBehaviour
 
     void StartGrapple()
     {
+        launchRope.Play();
         RaycastHit hit;
         if (Physics.Raycast(cameraSpot.position, cameraSpot.forward, out hit, maxDistance, grappleObject))
         {
@@ -59,11 +61,14 @@ public class GrapplingHook : MonoBehaviour
             lr.positionCount = 2;
             currentGrapplePosition = hand.position;
 
+            hookImpact.Play();
+
         }
     }
 
     void StopGrapple()
     {
+        retrieveRope.Play();
         lr.positionCount = 0;
         Destroy(joint);
         float tiltX = -90f;
@@ -82,6 +87,7 @@ public class GrapplingHook : MonoBehaviour
 
         lr.SetPosition(0, hand.position);
         lr.SetPosition(1, currentGrapplePosition);
+
         grapplingHook.gameObject.transform.position = (currentGrapplePosition * 1.25f);
 
         float tiltX = -180f;
