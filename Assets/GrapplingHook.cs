@@ -7,8 +7,9 @@ public class GrapplingHook : MonoBehaviour
 
     private LineRenderer lr;
     private Vector3 grapplePoint;
-    public LayerMask whatIsGrappleable;
-    public Transform gunTip, cameraSpot, player;
+    public LayerMask grappleObject;
+    public Transform hand, cameraSpot, player;
+    public GameObject grapplingHook;
     private float maxDistance = 100f;
     private SpringJoint joint;
 
@@ -29,17 +30,15 @@ public class GrapplingHook : MonoBehaviour
         }
     }
 
-    //Called after Update
     void LateUpdate()
     {
         DrawRope();
     }
 
-    /// Call whenever we want to start a grapple
     void StartGrapple()
     {
         RaycastHit hit;
-        if (Physics.Raycast(cameraSpot.position, cameraSpot.forward, out hit, maxDistance, whatIsGrappleable))
+        if (Physics.Raycast(cameraSpot.position, cameraSpot.forward, out hit, maxDistance, grappleObject))
         {
             grapplePoint = hit.point;
             joint = player.gameObject.AddComponent<SpringJoint>();
@@ -58,14 +57,18 @@ public class GrapplingHook : MonoBehaviour
             joint.massScale = 4.5f;
 
             lr.positionCount = 2;
-            currentGrapplePosition = gunTip.position;
+            currentGrapplePosition = hand.position;
+
         }
     }
-    /// Call whenever we want to stop a grapple
+
     void StopGrapple()
     {
         lr.positionCount = 0;
         Destroy(joint);
+        float tiltX = -90f;
+        grapplingHook.gameObject.transform.rotation = Quaternion.Euler(tiltX, 0, 0);
+        grapplingHook.gameObject.transform.position = hand.position;
     }
 
     private Vector3 currentGrapplePosition;
@@ -77,8 +80,12 @@ public class GrapplingHook : MonoBehaviour
 
         currentGrapplePosition = Vector3.Lerp(currentGrapplePosition, grapplePoint, Time.deltaTime * 8f);
 
-        lr.SetPosition(0, gunTip.position);
+        lr.SetPosition(0, hand.position);
         lr.SetPosition(1, currentGrapplePosition);
+        grapplingHook.gameObject.transform.position = (currentGrapplePosition * 1.25f);
+
+        float tiltX = -180f;
+        grapplingHook.gameObject.transform.rotation = Quaternion.Euler(tiltX, 0, 0);
     }
 
     public bool IsGrappling()

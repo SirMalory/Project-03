@@ -19,8 +19,8 @@ public class PlayerMovement : MonoBehaviour
     //Movement
     public float moveSpeed = 4500;
     public float maxSpeed = 20;
-    public bool grounded;
-    public LayerMask whatIsGround;
+    private bool grounded;
+    public LayerMask ground;
 
     public float counterMovement = 0.175f;
     private float threshold = 0.01f;
@@ -69,9 +69,6 @@ public class PlayerMovement : MonoBehaviour
         Look();
     }
 
-    /// <summary>
-    /// Find user input. Should put this in its own class but im lazy
-    /// </summary>
     private void MyInput()
     {
         x = Input.GetAxisRaw("Horizontal");
@@ -136,20 +133,18 @@ public class PlayerMovement : MonoBehaviour
         if (y > 0 && yMag > maxSpeed) y = 0;
         if (y < 0 && yMag < -maxSpeed) y = 0;
 
-        //Some multipliers
         float multiplier = 1f, multiplierV = 1f;
 
-        // Movement in air
+        //Air Movement
         if (!grounded)
         {
             multiplier = 0.5f;
             multiplierV = 0.5f;
         }
 
-        // Movement while sliding
+        // Slide Movement
         if (grounded && crouching) multiplierV = 0f;
 
-        //Apply forces to move player
         rb.AddForce(orientation.transform.forward * y * moveSpeed * Time.deltaTime * multiplier * multiplierV);
         rb.AddForce(orientation.transform.right * x * moveSpeed * Time.deltaTime * multiplier);
     }
@@ -160,11 +155,9 @@ public class PlayerMovement : MonoBehaviour
         {
             readyToJump = false;
 
-            //Add jump forces
             rb.AddForce(Vector2.up * jumpForce * 1.5f);
             rb.AddForce(normalVector * jumpForce * 0.5f);
 
-            //If jumping while falling, reset y velocity.
             Vector3 vel = rb.velocity;
             if (rb.velocity.y < 0.5f)
                 rb.velocity = new Vector3(vel.x, 0, vel.z);
@@ -186,15 +179,12 @@ public class PlayerMovement : MonoBehaviour
         float mouseX = Input.GetAxis("Mouse X") * sensitivity * Time.fixedDeltaTime * sensMultiplier;
         float mouseY = Input.GetAxis("Mouse Y") * sensitivity * Time.fixedDeltaTime * sensMultiplier;
 
-        //Find current look rotation
         Vector3 rot = playerCam.transform.localRotation.eulerAngles;
         desiredX = rot.y + mouseX;
 
-        //Rotate, and also make sure we dont over- or under-rotate.
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
 
-        //Perform the rotations
         playerCam.transform.localRotation = Quaternion.Euler(xRotation, desiredX, 0);
         orientation.transform.localRotation = Quaternion.Euler(0, desiredX, 0);
     }
@@ -220,7 +210,7 @@ public class PlayerMovement : MonoBehaviour
             rb.AddForce(moveSpeed * orientation.transform.forward * Time.deltaTime * -mag.y * counterMovement);
         }
 
-        //Limit diagonal running. This will also cause a full stop if sliding fast and un-crouching, so not optimal.
+        //Limit diagonal running
         if (Mathf.Sqrt((Mathf.Pow(rb.velocity.x, 2) + Mathf.Pow(rb.velocity.z, 2))) > maxSpeed)
         {
             float fallspeed = rb.velocity.y;
@@ -229,8 +219,6 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    /// Find the velocity relative to where the player is looking
-    /// Useful for vectors calculations regarding movement and limiting movement
     public Vector2 FindVelRelativeToLook()
     {
         float lookAngle = orientation.transform.eulerAngles.y;
@@ -257,15 +245,14 @@ public class PlayerMovement : MonoBehaviour
     /// Handle ground detection
     private void OnCollisionStay(Collision other)
     {
-        //Make sure we are only checking for walkable layers
-        int layer = other.gameObject.layer;
-        if (whatIsGround != (whatIsGround | (1 << layer))) return;
 
-        //Iterate through every collision in a physics update
+        int layer = other.gameObject.layer;
+        if (ground != (ground | (1 << layer))) return;
+
         for (int i = 0; i < other.contactCount; i++)
         {
             Vector3 normal = other.contacts[i].normal;
-            //FLOOR
+
             if (IsFloor(normal))
             {
                 grounded = true;
